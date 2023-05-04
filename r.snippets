@@ -1,0 +1,106 @@
+snippet header_script
+	#****************************************************************************
+	##
+	## Script name: ${1:script name}
+	##
+	## Purpose of script: ${2:purpose of script}
+	##
+	## Author: Nussaibah Raja Schoob
+	##
+	## Date Created: `r paste(Sys.Date())`
+	##
+	## Email: nussaibah.raja-schoob@gfk.com
+	##
+	## ---------------------------
+	##
+	## Notes: ${3:notes}
+	##   
+	##
+	#****************************************************************************
+	
+snippet sectionblock
+	#****************************************************************************
+	# ${1:section title} ----
+	#****************************************************************************
+	
+snippet spin.header
+	#' ---
+	#' title: '${1:section title}'
+	`r paste('#\' author: \'\x60r Sys.info()[["user"]]\x60\'')`
+	`r paste("#\' date: '\x60r Sys.Date()\x60'")`
+	#' output:
+	#'   html_notebook:
+	#'     code_folding: show
+	#'     toc: true
+	#'     toc_depth: 4
+	#'     toc_float: true
+	#'     collapsed: false
+	#' ---
+	#+ setup, include=FALSE
+	knitr::opts_chunk[['set']](collapse=FALSE, message=FALSE, warning=FALSE, prompt=FALSE)
+	knitr::opts_knit[['set']](root.dir = rprojroot::find_rstudio_root_file())
+	#+ libs, echo=TRUE, results = FALSE
+	## libraries in use
+	
+snippet header_webcrawling
+
+	#**************************************************************************************************#
+	retailer <- "${1:retailer}"        # e.g.: "hornbach" (short names without
+	# umlauts, spaces and special characters)
+	
+	country_code <- "${2:country}"           # e.g.: DEU (uppercase ISO 3166 Alpha-3,
+	# see GItoolbox::countries)
+	
+	bearbeiter <- "nussaibah.raja-schoo"                   # gfk nickname of author (e.g. ppwill)
+	
+	yyyymmdd <- "`r gsub('-', '', Sys.Date())`"                   # 20181231
+	#**************************************************************************************************#
+	
+	"${3:code goes here}"
+		
+	# get country code
+	cc2 <- GItoolbox::countries %>% 
+					filter(CC3 == country_code) %>% 
+					pull(CC2)
+	
+
+	
+	dat %>%
+		select(retailer, name, country , street, zip, city, xcoord, ycoord)
+	
+	
+	#**************************************************************************************************#
+	# 3. Save Results ----                                                                             #
+	#**************************************************************************************************#
+	p_drive <- GItoolbox::drive("p")	
+	path <-glue::glue("{p_drive}02_ingredients/external_basedata/_world/retail_data/webcrawling")
+	
+	retailer <- gsub(" ", "", stringi::stri_trans_general(str = retailer, id = "Latin-ASCII"))
+	
+	save("name of data",
+	file=file.path(path, "results", "Rdata", sprintf("%s_%s_%s.Rdata", country_code, retailer, yyyymmdd)))
+
+	openxlsx::write.xlsx("name of data",
+	file=file.path(path, "results", "Excel", sprintf("%s_%s_%s.xlsx", country_code, retailer, yyyymmdd)))
+	
+snippet chunk_selenium
+	version <- "107.0.5304.62"  
+	port=netstat::free_port()
+
+	eCaps <- list(
+	 chromeOptions = list(
+	 args = c('--no-sandbox', '--disable-gpu', '--start-maximized','--disable-popup-blocking','--disable-extensions',
+		'--disable-blink-features=AutomationControlled'),
+		excludeSwitches = list("enable-automation"),
+		useAutomationExtension = FALSE
+		)
+	)
+
+	#use the driver
+	rD <- rsDriver(browser="chrome",
+							port=port,
+							chromever=version,
+							verbose=T,
+							extraCapabilities=eCaps)
+
+	remDr <- rD{1:$}client # this allows us to access the remote driver
